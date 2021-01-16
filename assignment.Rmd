@@ -26,7 +26,7 @@ Then select only necessary data.
 
 ```{r, message=FALSE,warning=FALSE}
 myanmar$total <- c(206515,203481,17179,569906,109051,83747,424498,645329,405631,495140,580359,35796,122317,102612,472847)
-myanmar_select <- gg%>% select(id_1,name,total)
+myanmar_select <- myanmar%>% select(id_1,name,total)
 ```
 
 Convert the data to color numeric and forming labels.
@@ -42,7 +42,7 @@ labels <- sprintf(
 Making Graph
 
 ```{r, message=FALSE,warning=FALSE}
-leaflet(gg_select) %>%
+leaflet(myanmar_select) %>%
   addProviderTiles("MapBox",options = providerTileOptions(
     id = "mapbox.light",
     accessToken = 'pk....'

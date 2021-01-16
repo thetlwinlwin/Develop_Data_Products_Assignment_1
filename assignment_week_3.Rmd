@@ -1,0 +1,144 @@
+---
+title: "No of Health Care Facilities in Myanmar"
+author: "ThetLwinLwin"
+date: "1/17/2021"
+output: 
+  ioslides_presentation:
+    widescreen: true
+    fig_width: 7
+    fig_height: 5
+    logo: logo.png
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Introduction 
+
+Myanmar is one of the Southeast Asian Countries. It became popular after the transition to Democracy in 2008. Currently, every part of the government sectors is trying to improve the country. Here is choropleths of total health care facilities in both urban and rural area.
+
+The data is retrieved from [Ministry of Health and Sports](https://www.mohs.gov.mm/).
+
+
+## Loading Libraries and Data 
+
+The data is needed to be manually added as it comes as a png file.
+```{r, echo = TRUE,message=FALSE, warning=FALSE,results='hide'}
+library(leaflet)
+library(dbplyr)
+library(rgdal)
+library(spdplyr)
+
+#loading geojson
+myanmar <- readOGR('myanmar.geojson')
+
+#adding data to Spatialpolygon-Dataframe
+myanmar$rural_facilities <- c(129,67,29,249,49,32,188,90,206,250,153,85,63,68,191)
+myanmar$hospitals <- c(71,41,17,130,39,23,100,83,167,147,112,30,38,58,112)
+```
+
+## Manipulating Data
+
+```{r,echo = TRUE,message=FALSE, warning=FALSE}
+myanmar_select <- myanmar%>%
+  select(name,rural_facilities,hospitals)
+
+palrural <- colorNumeric('Reds',domain = myanmar_select$rural_facilities)
+palhospital <- colorNumeric('Reds',domain = myanmar_select$hospitals)
+
+labelhospital <- sprintf(
+  "<strong>%s</strong><br/>%s hospitals",
+  myanmar_select$name, myanmar_select$hospitals
+) %>% lapply(htmltools::HTML)
+
+labelrural <- sprintf(
+  "<strong>%s</strong><br/>%s facilities",
+  myanmar_select$name, myanmar_select$rural_facilities
+) %>% lapply(htmltools::HTML)
+```
+
+## Visualizing Number of Hospitals {.flexbox .vcenter}
+
+```{r plot, echo=FALSE,message=FALSE,warning=FALSE}
+leaflet(myanmar_select)%>%
+  addProviderTiles("MapBox",options = providerTileOptions(
+    id = "mapbox.light",
+    accessToken = 'pk.eyJ1IjoidGhldGx3aW4xMjMiLCJhIjoiY2tqeHZmODU2MDQ0bTJ3bXF4amd6Njg3eSJ9.3G2hw50it05Sr_Aj7wb8sw'
+  ))%>%
+  addPolygons(
+    fillColor = ~palhospital(hospitals),
+    weight = 1,
+    opacity = 1,
+    color = "white",
+    dashArray = "3",
+    fillOpacity = 0.7,
+    highlight = highlightOptions(
+      weight = 2,
+      color = "#a9bad4",
+      dashArray = "",
+      fillOpacity = 0.7,
+      bringToFront = TRUE
+    ),
+    label = labelhospital,
+    labelOptions = labelOptions(
+      style = list( "font-weight" = "normal",
+                    padding = "3px 8px",
+                    "box-shadow" = "3px 3px rgba(0,0,0,0.25)",
+                    "border-color" = "rgba(0,0,0,0.8)"),
+      textsize = "15px",
+      direction = "auto"
+    )
+  )%>%
+  addLegend(pal = palhospital, 
+            values = ~hospitals,
+            title = 'Hospitals in each Region',
+            position = 'bottomright')
+  
+```
+
+## Visualizing Number of Rural Health Care Facilities {.flexbox .vcenter}
+
+```{r, echo=FALSE,message=FALSE,warning=FALSE}
+leaflet(myanmar_select)%>%
+  addProviderTiles("MapBox",options = providerTileOptions(
+    id = "mapbox.light",
+    accessToken = 'pk.eyJ1IjoidGhldGx3aW4xMjMiLCJhIjoiY2tqeHZmODU2MDQ0bTJ3bXF4amd6Njg3eSJ9.3G2hw50it05Sr_Aj7wb8sw'
+  ))%>%
+  addPolygons(
+    fillColor = ~palrural(rural_facilities),
+    weight = 1,
+    opacity = 1,
+    color = "white",
+    dashArray = "3",
+    fillOpacity = 0.7,
+    highlight = highlightOptions(
+      weight = 2,
+      color = "#a9bad4",
+      dashArray = "",
+      fillOpacity = 0.7,
+      bringToFront = TRUE
+    ),
+    label = labelrural,
+    labelOptions = labelOptions(
+      style = list( "font-weight" = "normal",
+                    padding = "3px 8px",
+                    "box-shadow" = "3px 3px rgba(0,0,0,0.25)",
+                    "border-color" = "rgba(0,0,0,0.8)"),
+      textsize = "15px",
+      direction = "auto"
+    )
+  )%>%
+  addLegend(pal = palrural, 
+            values = ~rural_facilities,
+            title = 'Rural Health Care Facilities in each Region',
+            position = 'bottomright')
+  
+```
+
+
+## {.flexbox .vcenter}
+
+<div class="centered">
+<font size='50'>Thank You</font>
+</div>
